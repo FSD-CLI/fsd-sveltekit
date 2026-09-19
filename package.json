@@ -1,0 +1,47 @@
+{
+	"name": "fsd-sveltekit",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"typecheck:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"lint": "eslint .",
+		"fsd:check": "steiger ./src",
+		"audit": "npm audit --omit=dev --audit-level=high",
+		"ci": "npm run fsd:check && npm run lint && npm run typecheck && npm run build",
+		"prepare": "svelte-kit sync && husky"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^21.2.2",
+		"@commitlint/config-conventional": "^21.2.2",
+		"@eslint/js": "^10.0.1",
+		"@feature-sliced/steiger-plugin": "^0.7.0",
+		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@tailwindcss/vite": "^4.3.3",
+		"eslint": "^10.11.0",
+		"eslint-plugin-svelte": "^3.23.0",
+		"globals": "^17.12.0",
+		"husky": "^9.1.7",
+		"steiger": "^0.6.0",
+		"svelte": "^5.56.1",
+		"svelte-check": "^4.6.0",
+		"tailwindcss": "^4.3.3",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.70.0",
+		"vite": "^8.0.16"
+	},
+	"dependencies": {
+		"@tanstack/svelte-query": "^6.2.1",
+		"sveltekit-superforms": "^2.30.2",
+		"zod": "^4.6.5"
+	},
+	"engines": {
+		"node": ">=22.22.2"
+	}
+}
