@@ -15,6 +15,11 @@ export function validateAudit(report, policy, now = new Date()) {
   }
   const errors = [];
   const accepted = [];
+  const pendingAggregates = [];
+  const aggregateDependencies = {
+    '@sveltejs/kit': 'cookie',
+    'sveltekit-superforms': '@sveltejs/kit',
+  };
   for (const finding of Object.values(report.vulnerabilities)) {
     const details = finding.via;
     if (!Array.isArray(details) || !details.length) {
@@ -28,18 +33,31 @@ export function validateAudit(report, policy, now = new Date()) {
       return exception.package === finding.name && exception.severity === finding.severity &&
         item.severity === exception.severity && item.url === exception.url &&
         exception.owner?.trim() && exception.reason?.trim() && exception.control?.trim() &&
-        Number.isFinite(deadline.getTime()) && now <= deadline;
+        Number.isFinite(deadline.getTime()) &&
+        deadline.toISOString().slice(0, 10) === exception.reviewBy && now <= deadline;
     }));
-    // SvelteKit's aggregate is accepted only when cookie is independently accepted.
-    const aggregate = finding.name === '@sveltejs/kit' && finding.severity === 'low' &&
-      inherited.length === 1 && inherited[0] === 'cookie' &&
-      report.vulnerabilities.cookie && !direct.length;
+    // Accept only the explicit low-severity chain, after its dependency is accepted.
+    const dependency = aggregateDependencies[finding.name];
+    const aggregate = dependency && finding.severity === 'low' &&
+      inherited.length === 1 && inherited[0] === dependency && !direct.length;
     if (matches && !inherited.length && direct.length) accepted.push(finding.name);
+    else if (aggregate) pendingAggregates.push({ name: finding.name, dependency });
     else if (!aggregate) errors.push(`${finding.name}: ${finding.severity} finding is not covered by an active exception`);
   }
-  const aggregate = report.vulnerabilities['@sveltejs/kit'];
-  if (aggregate && !errors.some((error) => error.startsWith('@sveltejs/kit:')) &&
-      !accepted.includes('cookie')) errors.push('@sveltejs/kit: cookie exception is absent or expired');
+  const resolved = new Set(accepted);
+  let progressed = true;
+  while (progressed) {
+    progressed = false;
+    for (const aggregate of pendingAggregates) {
+      if (!resolved.has(aggregate.name) && resolved.has(aggregate.dependency)) {
+        resolved.add(aggregate.name);
+        progressed = true;
+      }
+    }
+  }
+  for (const aggregate of pendingAggregates) {
+    if (!resolved.has(aggregate.name)) errors.push(`${aggregate.name}: dependency exception is absent or expired`);
+  }
   if (errors.length) throw new Error(errors.join('\n'));
   return { accepted, counts: report.metadata.vulnerabilities };
 }

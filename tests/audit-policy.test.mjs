@@ -33,3 +33,18 @@ test('an incomplete finding list cannot hide a high metadata count', () => {
   const value = report(); value.metadata.vulnerabilities.high = 1;
   assert.throws(() => validateAudit(value, policy, now), /inconsistent/);
 });
+
+test('Superforms inherits only the independently accepted SvelteKit cookie chain', () => {
+  const value = report();
+  value.vulnerabilities['sveltekit-superforms'] = {name:'sveltekit-superforms',severity:'low',via:['@sveltejs/kit']};
+  value.metadata.vulnerabilities.low = 3; value.metadata.vulnerabilities.total = 3;
+  assert.deepEqual(validateAudit(value, policy, now).accepted, ['cookie']);
+  assert.throws(() => validateAudit(value, policy, new Date('2026-11-07')), /expired|not covered/);
+  value.vulnerabilities['sveltekit-superforms'].via.push({severity:'low',url:'https://github.com/advisories/new'});
+  assert.throws(() => validateAudit(value, policy, now), /not covered/);
+});
+
+test('invalid calendar review dates cannot extend an exception', () => {
+  const invalid = structuredClone(policy); invalid.exceptions[0].reviewBy = '2026-11-31';
+  assert.throws(() => validateAudit(report(), invalid, now), /not covered/);
+});
