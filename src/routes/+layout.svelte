@@ -9,7 +9,7 @@
 	<title>FSD CLI · SvelteKit</title>
 	<meta
 		name="description"
-		content="A production-ready SvelteKit starter with Feature-Sliced Design architecture."
+		content="A SvelteKit starter with Feature-Sliced Design architecture."
 	/>
 </svelte:head>
 

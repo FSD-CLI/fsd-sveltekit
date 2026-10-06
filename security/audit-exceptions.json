@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "exceptions": [
+    {
+      "advisory": "GHSA-pxg6-pf52-xh8x",
+      "url": "https://github.com/advisories/GHSA-pxg6-pf52-xh8x",
+      "package": "cookie",
+      "severity": "low",
+      "owner": "FSD-CLI maintainers (ashrafmo-1)",
+      "reviewBy": "2026-11-06",
+      "reason": "The locked SvelteKit 2 tree carries cookie <0.7.0. npm recommends a SvelteKit major upgrade; validate framework and cookie behavior before changing it.",
+      "control": "Application code must not pass untrusted cookie names, paths or domains. The gate accepts only this advisory and its SvelteKit aggregate; all other production findings fail."
+    }
+  ]
+}

@@ -1,10 +1,17 @@
 # FSD SvelteKit Starter
 
-Production-ready SvelteKit template powered by
+SvelteKit template powered by
 [Feature-Sliced Design](https://feature-sliced.design/).
 
 This repository is the SvelteKit template used by
 [`create-fsd-architecture`](https://www.npmjs.com/package/create-fsd-architecture).
+
+## Validation scope
+
+This is a starter template. Repository quality checks cover the checked-in
+example; production deployment requires validating your application, runtime,
+API integration, authentication, and hosting configuration. CLI support and
+release verification are documented at [fsdcli.me](https://fsdcli.me).
 
 ## Create a project
 
@@ -62,6 +69,17 @@ npm run build
 npm run audit
 npm run ci
 ```
+
+## Dependency audit policy
+
+`npm run audit` records the production dependency report and fails on any
+finding outside the narrowly tracked [cookie exception](security/audit-exceptions.json).
+The current two low entries represent one cookie advisory and its SvelteKit
+aggregate, not two independent defects. No high/critical exception is allowed.
+Owner: FSD-CLI maintainers (ashrafmo-1). Review deadline: 2026-11-06 UTC.
+A SvelteKit major upgrade or cookie override requires compatibility verification;
+this exception expires rather than silently accepting the advisory forever.
+Run `npm run test:audit-policy` to verify expiry and fail-closed behavior.
 
 ## Generate slices
 

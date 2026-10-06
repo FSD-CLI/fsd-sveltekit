@@ -24,7 +24,7 @@ jobs:
         run: git diff --check
       - name: Run checks
         run: npm run ci
+      - name: Verify audit exception policy
+        run: npm run test:audit-policy
       - name: Audit production dependencies
-        # The current SvelteKit release carries a low-severity cookie advisory.
-        # Block high/critical production issues while upstream ships its fix.
         run: npm run audit
