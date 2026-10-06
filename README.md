@@ -74,8 +74,8 @@ npm run ci
 
 `npm run audit` records the production dependency report and fails on any
 finding outside the narrowly tracked [cookie exception](security/audit-exceptions.json).
-The current three low entries represent one cookie advisory and its SvelteKit
-aggregate, not two independent defects. No high/critical exception is allowed.
+The current three low entries represent one cookie advisory and its exact
+SvelteKit/Superforms aggregate chain. No high/critical exception is allowed.
 Owner: FSD-CLI maintainers (ashrafmo-1). Review deadline: 2026-11-06 UTC.
 A SvelteKit major upgrade or cookie override requires compatibility verification;
 this exception expires rather than silently accepting the advisory forever.
