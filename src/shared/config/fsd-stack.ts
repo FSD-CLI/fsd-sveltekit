@@ -8,5 +8,5 @@ export const fsdStack = {
 	commands: {
 		generateFeature: 'npx create-fsd-architecture --generate feature auth'
 	},
-	docsUrl: 'https://fsd-docs.vercel.app'
+	docsUrl: 'https://fsdcli.me'
 } as const;

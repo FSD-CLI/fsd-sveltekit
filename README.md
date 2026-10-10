@@ -1,10 +1,17 @@
 # FSD SvelteKit Starter
 
-Production-ready SvelteKit template powered by
+SvelteKit template powered by
 [Feature-Sliced Design](https://feature-sliced.design/).
 
 This repository is the SvelteKit template used by
 [`create-fsd-architecture`](https://www.npmjs.com/package/create-fsd-architecture).
+
+## Validation scope
+
+This is a starter template. Repository quality checks cover the checked-in
+example; production deployment requires validating your application, runtime,
+API integration, authentication, and hosting configuration. CLI support and
+release verification are documented at [fsdcli.me](https://fsdcli.me).
 
 ## Create a project
 
@@ -63,6 +70,17 @@ npm run audit
 npm run ci
 ```
 
+## Dependency audit policy
+
+`npm run audit` records the production dependency report and fails on any
+finding outside the narrowly tracked [cookie exception](security/audit-exceptions.json).
+The current three low entries represent one cookie advisory and its exact
+SvelteKit/Superforms aggregate chain. No high/critical exception is allowed.
+Owner: FSD-CLI maintainers (ashrafmo-1). Review deadline: 2026-11-06 UTC.
+A SvelteKit major upgrade or cookie override requires compatibility verification;
+this exception expires rather than silently accepting the advisory forever.
+Run `npm run test:audit-policy` to verify expiry and fail-closed behavior.
+
 ## Generate slices
 
 ```bash
@@ -94,3 +112,16 @@ If this project helps you, you can optionally support its development:
 
 For InstaPay, use the username exactly as shown and verify the recipient details
 in the app before confirming a transfer. Donations are optional.
+
+## Git workflow policy
+
+Git and Conventional Commits remain part of setup. Pre-commit checks staged and
+working-tree whitespace; full builds run in CI. Set `FSD_PRE_COMMIT_LINT=1` to
+run lint on commit or `FSD_PRE_PUSH_CHECKS=1` to run lint/build on push.
+For an intentional emergency bypass, Husky supports `HUSKY=0 git commit ...`;
+CI remains the required quality gate and failures must still be resolved.
+
+Auto-PR and PR labeling are optional and are not enabled in this template.
+Configure repository permissions, label rules, and labels before adding either
+workflow. The React template provides its own automation configuration; inspect
+that repository's current workflows before copying them.
