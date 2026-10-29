@@ -1,63 +1,67 @@
+// Production dependency gate: every finding at or above the policy gate
+// severity must be covered by an active, owned exception. Lower severities are
+// reported but do not fail the gate.
+const SEVERITIES = ['info', 'low', 'moderate', 'high', 'critical'];
+
+function activeException(policy, now, name, severity, url) {
+  return policy.exceptions.find((exception) => {
+    const deadline = new Date(`${exception.reviewBy}T23:59:59.999Z`);
+    return exception.package === name && exception.severity === severity && exception.url === url &&
+      exception.owner?.trim() && exception.reason?.trim() && exception.control?.trim() &&
+      Number.isFinite(deadline.getTime()) &&
+      deadline.toISOString().slice(0, 10) === exception.reviewBy && now <= deadline;
+  });
+}
+
 export function validateAudit(report, policy, now = new Date()) {
   if (!report || report.error || !report.vulnerabilities || !report.metadata?.vulnerabilities) {
     throw new Error('Audit did not return a complete vulnerability report.');
   }
-  if (policy.version !== 1 || !Array.isArray(policy.exceptions)) {
+  if (policy.version !== 1 || !Array.isArray(policy.exceptions) || !SEVERITIES.includes(policy.gate)) {
     throw new Error('Invalid audit exception policy.');
   }
   const counts = report.metadata.vulnerabilities;
   const entries = Object.entries(report.vulnerabilities);
-  const severities = ['info', 'low', 'moderate', 'high', 'critical'];
   if (!Number.isInteger(counts.total) || counts.total !== entries.length ||
-      entries.some(([key, finding]) => key !== finding.name || !severities.includes(finding.severity)) ||
-      severities.some((severity) => (counts[severity] ?? 0) !== entries.filter(([, finding]) => finding.severity === severity).length)) {
+      entries.some(([key, finding]) => key !== finding.name || !SEVERITIES.includes(finding.severity)) ||
+      SEVERITIES.some((severity) => (counts[severity] ?? 0) !== entries.filter(([, finding]) => finding.severity === severity).length)) {
     throw new Error('Audit counts or finding schema are inconsistent.');
   }
-  const errors = [];
+
+  const gated = (severity) => SEVERITIES.indexOf(severity) >= SEVERITIES.indexOf(policy.gate);
   const accepted = [];
-  const pendingAggregates = [];
-  const aggregateDependencies = {
-    '@sveltejs/kit': 'cookie',
-    'sveltekit-superforms': '@sveltejs/kit',
-  };
+  const reported = [];
+  const pendingDependents = [];
+  const errors = [];
   for (const finding of Object.values(report.vulnerabilities)) {
-    const details = finding.via;
-    if (!Array.isArray(details) || !details.length) {
-      errors.push(`${finding.name}: missing advisory details`);
+    if (!gated(finding.severity)) {
+      reported.push(`${finding.name} (${finding.severity})`);
       continue;
     }
+    const details = Array.isArray(finding.via) ? finding.via : [];
     const direct = details.filter((item) => typeof item === 'object');
     const inherited = details.filter((item) => typeof item === 'string');
-    const matches = direct.every((item) => policy.exceptions.some((exception) => {
-      const deadline = new Date(`${exception.reviewBy}T23:59:59.999Z`);
-      return exception.package === finding.name && exception.severity === finding.severity &&
-        item.severity === exception.severity && item.url === exception.url &&
-        exception.owner?.trim() && exception.reason?.trim() && exception.control?.trim() &&
-        Number.isFinite(deadline.getTime()) &&
-        deadline.toISOString().slice(0, 10) === exception.reviewBy && now <= deadline;
-    }));
-    // Accept only the explicit low-severity chain, after its dependency is accepted.
-    const dependency = aggregateDependencies[finding.name];
-    const aggregate = dependency && finding.severity === 'low' &&
-      inherited.length === 1 && inherited[0] === dependency && !direct.length;
-    if (matches && !inherited.length && direct.length) accepted.push(finding.name);
-    else if (aggregate) pendingAggregates.push({ name: finding.name, dependency });
-    else if (!aggregate) errors.push(`${finding.name}: ${finding.severity} finding is not covered by an active exception`);
-  }
-  const resolved = new Set(accepted);
-  let progressed = true;
-  while (progressed) {
-    progressed = false;
-    for (const aggregate of pendingAggregates) {
-      if (!resolved.has(aggregate.name) && resolved.has(aggregate.dependency)) {
-        resolved.add(aggregate.name);
-        progressed = true;
-      }
+    if (direct.length && !inherited.length &&
+        direct.every((item) => item.severity === finding.severity &&
+          activeException(policy, now, finding.name, finding.severity, item.url))) {
+      accepted.push(finding.name);
+    } else if (!direct.length && inherited.length === 1) {
+      pendingDependents.push({ name: finding.name, severity: finding.severity, dependency: inherited[0] });
+    } else {
+      errors.push(`${finding.name}: ${finding.severity} finding is not covered by an active exception`);
     }
   }
-  for (const aggregate of pendingAggregates) {
-    if (!resolved.has(aggregate.name)) errors.push(`${aggregate.name}: dependency exception is absent or expired`);
+  // A dependent is accepted only when it inherits solely from an accepted
+  // package whose exception explicitly names it.
+  for (const dependent of pendingDependents) {
+    const exception = policy.exceptions.find((item) => item.package === dependent.dependency);
+    if (!accepted.includes(dependent.dependency) || !exception?.dependents?.includes(dependent.name) ||
+        exception.severity !== dependent.severity) {
+      errors.push(`${dependent.name}: ${dependent.severity} finding is not covered by an active exception`);
+    } else {
+      accepted.push(dependent.name);
+    }
   }
   if (errors.length) throw new Error(errors.join('\n'));
-  return { accepted, counts: report.metadata.vulnerabilities };
+  return { accepted, reported, counts };
 }
