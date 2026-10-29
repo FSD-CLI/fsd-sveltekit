@@ -17,4 +17,6 @@ process.stdout.write(audit.stdout);
 const report = JSON.parse(audit.stdout);
 const policy = JSON.parse(fs.readFileSync(new URL('../security/audit-exceptions.json', import.meta.url), 'utf8'));
 const result = validateAudit(report, policy);
-console.log(`Production audit passed; accepted packages: ${result.accepted.join(', ') || 'none'}`);
+console.log(`\nProduction audit passed (gate: ${policy.gate}).`);
+console.log(`Accepted by exception: ${result.accepted.join(', ') || 'none'}`);
+console.log(`Below gate, reported only: ${result.reported.join(', ') || 'none'}`);
