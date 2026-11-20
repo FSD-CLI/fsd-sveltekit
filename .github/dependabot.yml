@@ -10,3 +10,25 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      # ESLint, its plugins and typescript-eslint share peer ranges, so a bump
+      # of one alone often cannot install. Update them together.
+      lint-tooling:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-plugin-*"
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+          - "globals"
+    ignore:
+      # typescript-eslint supports TypeScript <6.1 only, so TypeScript 7 cannot
+      # install yet. Revisit when typescript-eslint accepts it.
+      - dependency-name: typescript
+        versions: [">=7"]
+      # adapter-auto 8 requires SvelteKit 3, and sveltekit-superforms only
+      # accepts SvelteKit 1.x or 2.x. Hold both until the Kit 3 migration.
+      - dependency-name: "@sveltejs/adapter-auto"
+        versions: [">=8"]
+      - dependency-name: "@sveltejs/kit"
+        versions: [">=3"]

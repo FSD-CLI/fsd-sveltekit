@@ -10,7 +10,7 @@ Use [private vulnerability reporting](https://github.com/FSD-CLI/fsd-sveltekit/s
 
 Production dependencies must pass the high/critical npm audit gate. Development/build dependencies require separate review; a passing production audit does not certify the full dependency tree or a deployed application.
 
-SvelteKit has one narrow, owned, expiring low-severity cookie exception in `security/audit-exceptions.json`. The policy validator rejects new advisories, higher severity, expired exceptions and incomplete audit reports.
+The production gate fails on high and critical findings unless an owned, expiring exception in `security/audit-exceptions.json` covers them (currently none). Low and moderate findings are reported. The policy validator rejects new advisories, higher severity, expired exceptions and incomplete audit reports.
 
 Security exceptions require an advisory, affected scope, owner, reason, compensating control and review date. High/critical findings have no implicit exception; the gate stays failed until remediated or an explicit reviewed exception is approved. Branch protection and required-check settings need repository administrator configuration; checked-in workflows alone do not enforce merge protection.
 
