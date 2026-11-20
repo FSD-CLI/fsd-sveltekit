@@ -21,7 +21,7 @@ npx create-fsd-architecture@latest my-app --framework sveltekit
 
 ## Stack
 
-- Svelte 5 and SvelteKit 2
+- Svelte 5 and SvelteKit 3
 - TypeScript, runes mode, and server-side rendering
 - TanStack Svelte Query with a request-safe provider
 - Svelte stores for client state
