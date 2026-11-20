@@ -1,6 +1,6 @@
-import { env } from '$env/dynamic/public';
+import { PUBLIC_API_BASE } from '$app/env/public';
 
-const apiBaseUrl = env.PUBLIC_API_BASE || '/api';
+const apiBaseUrl = PUBLIC_API_BASE;
 
 export async function apiFetch<T>(
 	path: string,
