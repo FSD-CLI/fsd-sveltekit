@@ -21,8 +21,8 @@
 		"@commitlint/config-conventional": "^21.2.2",
 		"@eslint/js": "^10.0.1",
 		"@feature-sliced/steiger-plugin": "^0.7.0",
-		"@sveltejs/adapter-auto": "^7.0.1",
-		"@sveltejs/kit": "^2.70.3",
+		"@sveltejs/adapter-auto": "^9.0.0",
+		"@sveltejs/kit": "^3.4.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/vite": "^4.3.3",
 		"eslint": "^10.14.0",
@@ -39,7 +39,7 @@
 	},
 	"dependencies": {
 		"@tanstack/svelte-query": "^6.4.1",
-		"sveltekit-superforms": "^2.30.2",
+		"sveltekit-superforms": "^3.1.0",
 		"zod": "^4.6.5"
 	},
 	"engines": {
